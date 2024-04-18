@@ -1,45 +1,14 @@
 ###############################################################################
-## Data Functions
-###############################################################################
-# Function is essentially an array of letters in order
-# We wrap it in a function so we don't have to enter this in each method
-
-def alphabet
-  alphabet = [
-    "a",
-    "b",
-    "c",
-    "d",
-    "e",
-    "f",
-    "g",
-    "h",
-    "i",
-    "j",
-    "k",
-    "l",
-    "m",
-    "n",
-    "o",
-    "p",
-    "q",
-    "r",
-    "s",
-    "t",
-    "u",
-    "v",
-    "w",
-    "x",
-    "y",
-    "z"
-  ]
-end
-
-
-###############################################################################
 ## Helper Functions
 ###############################################################################
 # Used by the main function call to encrypt the string
+
+# Function is essentially an array of letters in order
+def alphabet
+  alphabet = []
+  ("a".."z").each { |letter| alphabet.push(letter) }
+  alphabet
+end
 
 def get_index_by_letter letter
   # shift indexes so they don't start at 0, helps with math
