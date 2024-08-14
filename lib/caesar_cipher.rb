@@ -13,8 +13,7 @@ class CaesarCipher
   def initialize
     @encrypted_string = ''
     @decrypted_string = ''
-    @alphabet = []
-    ('a'..'z').each { |letter| alphabet.push(letter) }
+    init_alphabet
     choose
   end
 
@@ -77,6 +76,11 @@ class CaesarCipher
   ###############################################################################
 
   private
+
+  def init_alphabet
+    @alphabet = []
+    ('a'..'z').each { |letter| alphabet.push(letter) }
+  end
 
   def letter?(char)
     !!alphabet.find_index(char.downcase)
