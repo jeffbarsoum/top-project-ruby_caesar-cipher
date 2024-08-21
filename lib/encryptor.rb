@@ -3,29 +3,29 @@
 require 'input'
 # encrypts and decrypts strings, given a shift factor
 class Encryptor
-  attr_reader :alphabet, :encrypted_string, :decrypted_string
-
-  include Input
+  attr_reader :alphabet, :input, :input_string, :encrypted_string, :decrypted_string
 
   ###############################################################################
   ## Main Class Methods
   ###############################################################################
 
-  def initialize
+  def initialize(input = Input.new)
+    @input_string = ''
     @encrypted_string = ''
     @decrypted_string = ''
     init_alphabet
+    @input = input
   end
 
   def encrypt
-    input_string
+    enter_string(__method__)
     shift_factor
     self.encrypted_string = @input_string
     puts "Your encrypted string is (shh!):\n#{encrypted_string}"
   end
 
   def decrypt
-    input_string
+    enter_string(__method__)
     shift_factor
     self.decrypted_string = @input_string
     puts "Your decrypted string is (shh!):\n#{decrypted_string}"
@@ -35,45 +35,43 @@ class Encryptor
   ## Setter Methods
   ###############################################################################
 
-  def input_string
-    @input_string = input('Please enter the message you want to make super secret (shhh!):')
-  end
-
-  def shift_factor
-    @shift_factor = input('Please enter your desired shift parameter (must be 1 or greater!):').to_i
-    until @shift_factor.is_a?(Integer) && @shift_factor.positive?
-      @shift_factor = input('Please enter a number that is 1 or greater!').to_i
-    end
-  end
-
-  def encrypted_string=(input)
-    @decrypted_string = input
-    string_arr = input.split ''
-    string_arr.each { |letter| @encrypted_string += shift_letter(letter, @shift_factor) }
-  end
-
-  def decrypted_string=(input)
-    @encrypted_string = input
-    string_arr = input.split ''
-    string_arr.each { |letter| @decrypted_string += shift_letter(letter, -@shift_factor) }
-  end
-
-  ###############################################################################
-  ## Private Helper Methods
-  ###############################################################################
-
-  private
-
   def init_alphabet
     @alphabet = []
     ('a'..'z').each { |letter| alphabet.push(letter) }
   end
 
-  def letter?(char)
-    !!alphabet.find_index(char.downcase)
+  def enter_string(caller)
+    return unless %i[encrypt decrypt].include? caller
+
+    @input_string = input.get("Please enter the message you want to #{caller} (shhh!):")
+  end
+
+  def shift_factor
+    @shift_factor = input.get('Please enter your desired shift parameter (must be 1 or greater!):').to_i
+    until @shift_factor.is_a?(Integer) && @shift_factor.positive?
+      @shift_factor = input.get('Input Error! Please enter a number that is 1 or greater!').to_i
+    end
+  end
+
+  def cipher(input, shift_factor)
+    raise StandardError unless input.is_a? String
+
+    input.split('').map { |char| shift_letter(char, shift_factor) }.join
+    # string_arr.each { |letter| @encrypted_string += shift_letter(letter, shift_factor) }
+  end
+
+  def encrypted_string=(input)
+    @decrypted_string = input
+    @encrypted_string = cipher(input, @shift_factor)
+  end
+
+  def decrypted_string=(input)
+    @encrypted_string = input
+    @decrypted_string = cipher(input, -@shift_factor)
   end
 
   def shift_letter(char, shift_factor)
+    raise EncryptorError unless shift_factor.is_a?(Integer)
     return char unless letter?(char)
 
     letter_index = get_index_by_letter(char)
@@ -91,6 +89,16 @@ class Encryptor
     shifted_letter_index = (letter_index + shift_factor).remainder(26)
     encr_letter_key = get_letter_by_index(shifted_letter_index)
     upcase?(char) ? encr_letter_key.upcase : encr_letter_key
+  end
+
+  ###############################################################################
+  ## Private Helper Methods
+  ###############################################################################
+
+  private
+
+  def letter?(char)
+    !!alphabet.find_index(char.downcase)
   end
 
   def get_index_by_letter(letter)
